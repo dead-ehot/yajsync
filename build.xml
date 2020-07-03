@@ -1,0 +1,127 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE project [
+  <!ENTITY commonAntCommands SYSTEM "../one-deploy/build/common-ant.xml">
+]>
+<project name="yajsync" default="core" basedir="." xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+
+    <!-- ============================================================================ -->
+    <!-- Global definition -->
+    <!-- ============================================================================ -->
+
+    <!-- path to root -->
+    <property name="root.dir" value="${basedir}"/>
+
+    <!-- local.properties имеют высший приоритет -->
+    <property file="${root.dir}/local.properties"/>
+
+    <!-- проперти для деплоймент целей -->
+    <property file="${user.home}/one/${ant.project.name}.properties"/>
+
+    &commonAntCommands; <!-- include common ant commands -->
+
+    <property name="build.dir" value="${build}" />
+    <property name="build.native" value="${build}/native"/>
+    <property name="src.native" value="${root.dir}/native"/>
+
+    <!-- ============================================================================ -->
+    <!-- Initialize -->
+    <!-- ============================================================================ -->
+
+    <target name="check-environment"/>
+    
+    <target name="init" depends="check-environment">
+        <echo message="build.compiler = ${build.compiler}"/>
+        <echo message="user.home = ${user.home}"/>
+        <echo message="java.home = ${java.home}"/>
+        <echo message="ant.home = ${ant.home}"/>
+        <echo message="java.class.path = ${java.class.path}"/>
+        <echo message=""/>
+
+        <path id="compile.classpath.ref">
+            <fileset dir="${build.ivy.lib}" includes="**/*.jar"/>
+        </path>
+        <property name="compile.classpath" refid="compile.classpath.ref"/>
+    	
+    	<typedef resource="org/apache/maven/artifact/ant/antlib.xml"
+    	           uri="antlib:org.apache.maven.artifact.ant"
+    	           classpathref="compile.classpath.ref" />
+    	
+    	<artifact:pom id="pom" file="${root.dir}/pom.xml" />
+    </target>
+
+
+    <!-- ============================================================================ -->
+    <!-- Build client jars library files -->
+    <!-- ============================================================================ -->
+    <target name="client-jar" depends="init, prepare-build">
+        <antcall target="info">
+            <param name="info.msg" value="Invoking pom to build '${ant.project.name}' "/>
+        </antcall>
+    	
+    	<artifact:mvn pom="${root.dir}/pom.xml" mavenversion="3.0.3" >
+            <arg value="-DskipTests"/>
+            <arg value="clean"/>
+            <arg value="package"/>
+        </artifact:mvn>
+
+    	<echo> ${pom.version} </echo>
+    	<move file="${root.dir}/yajsync-app/target/yajsync-app-${pom.version}-full.jar" tofile="${build.components}/${ant.project.name}-${build.number.str}.jar"/>
+
+    </target>
+
+    <target name="ivy-assemble-source-jars" depends="init, prepare-build">
+        <mkdir dir="${ivy.deliver.source.dir}"/>
+    	<jar destfile="${ivy.deliver.source.dir}/${ant.project.name}.jar">
+            <zipfileset dir="${root.dir}/yajsync-app/src" includes="**"/>
+            <zipfileset dir="${root.dir}/yajsync-core/src" includes="**"/>
+    	</jar>
+    </target>
+
+    <!-- ============================================================================ -->
+    <!-- Build package release -->
+    <!-- ============================================================================ -->
+    <target name="build">
+        <property name="banner.title" value="Development building '${ant.project.name} ${build.number.str}'."/>
+        <antcall target="banner"/>
+
+        <antcall target="ivy-retrieve-all"/>
+        <antcall target="client-jar"/>
+    </target>
+
+    <target name="test" depends="init, prepare-build" >
+        <artifact:mvn pom="${root.dir}/pom.xml" mavenversion="3.0.3" >
+            <arg value="clean"/>
+            <arg value="test"/>
+        </artifact:mvn>
+
+    </target>
+
+	<!-- ============================================================================ -->
+    <!-- MANDATORY TASK -->
+    <!-- Build package release with dependecies -->
+    <!-- ============================================================================ -->
+    <target name="build-release">
+        <antcall target="ivy-retrieve-all"/>
+        <antcall target="client-jar"/>
+
+        <copy todir="${build.deploy.client.lib}">
+            <fileset dir="${build.lib}" includes="*.jar"/>
+        </copy>
+    </target>
+
+
+    <!-- ============================================================================ -->
+    <!-- MANDATORY TASK -->
+    <!-- Deploy package release -->
+    <!-- ============================================================================ -->
+    <target name="deploy-release">
+    	<fail>
+    	    This is library project and can not be deployed.
+    	</fail>
+    </target>
+
+    <target name="core" depends="project-instructions"/>
+
+</project>
