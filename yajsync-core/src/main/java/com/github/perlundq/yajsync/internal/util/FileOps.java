@@ -218,6 +218,11 @@ public class FileOps
         return mode & S_IFMT;
     }
 
+    public static int unixMode(int mode)
+    {
+        return mode & ~S_IFMT;
+    }
+
     public static boolean isRegularFile(int mode)
     {
         return fileType(mode) == S_IFREG;
