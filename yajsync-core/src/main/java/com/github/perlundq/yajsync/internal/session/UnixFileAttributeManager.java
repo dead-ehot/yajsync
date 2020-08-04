@@ -273,7 +273,7 @@ public final class UnixFileAttributeManager extends FileAttributeManager
     @Override
     public void setFileMode(Path path, int mode, LinkOption... linkOption) throws IOException
     {
-        Files.setAttribute(path, "unix:mode", FileOps.unixMode( mode ), linkOption);
+        Files.setAttribute(path, "unix:mode", mode, linkOption);
     }
 
     private UserPrincipal getUserPrincipalFrom(String userName) throws IOException
