@@ -50,6 +50,18 @@ public class XXHashDigest implements ChecksumDigest
     }
     
     @Override
+    public boolean chunkAndZeroCheck( ByteBuffer buf, ByteBuffer zeroBlockDigest )
+    {
+        if ( buf.remaining() == 0 )
+            return false;
+
+        long hashBytes = this.xxhash.hashBytes( buf );
+        this.xxhash = LongHashFunction.xx( hashBytes );
+
+        return zeroBlockDigest.getLong( zeroBlockDigest.position() ) == hashBytes;
+    }
+    
+    @Override
     public void chunk( ByteBuffer buf )
     {
         if ( buf.remaining() == 0 )

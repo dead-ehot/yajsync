@@ -23,6 +23,13 @@ public interface ChecksumDigest
     ByteBuffer digest( byte[] buf, int pos, int off, ByteBuffer digest );
     ByteBuffer digest( ByteBuffer buf, ByteBuffer digest );
 
+    /**
+     * @zeroBlockDigest a digest computed by call to {@link #digest(ByteBuffer)} with all zeroes byteBuffer to compare to
+     * @return could this chunk be all-zeroes ? this underlying algo can check known digest of all zero block with the hash of supplied buf.
+     *         such may-be-zeroes block should then be double checked for it to avoid possible collisions.
+     *         it is safe to return true always here - this just means that excessive zero checks will be carried out.
+     */
+    boolean chunkAndZeroCheck( ByteBuffer buf, ByteBuffer zeroBlockDigest );
     void chunk( ByteBuffer buf );
     void chunk( byte[] buf, int pos, int len );
 
@@ -61,4 +68,5 @@ public interface ChecksumDigest
         
         return true;
     }
+
 }
