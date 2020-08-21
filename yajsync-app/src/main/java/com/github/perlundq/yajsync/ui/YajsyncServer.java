@@ -253,9 +253,8 @@ public final class YajsyncServer
                         sock.close();
                     } catch (IOException e) {
                         if (_log.isLoggable(Level.SEVERE)) {
-                            _log.log(Level.SEVERE,(String.format(
-                                "Got error during close of socket %s: %s",
-                                sock, e.getMessage()),e);
+                            _log.log( Level.SEVERE, String.format( "Got error during close of socket %s: %s",
+                                            sock, e.getMessage() ), e );
                         }
                     }
                 }
