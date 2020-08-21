@@ -342,10 +342,11 @@ public final class Sender implements RsyncTask, MessageHandler
         _defaultDirectoryPermissions = builder._defaultDirectoryPermissions;
         _blockSize = builder._blockSize;
         
-        if ( _isSparse )
+        if ( _isSparse ) {
             _sparseBlockChecksum = _checksumHash.instance( 0 ).digest( ByteBuffer.allocate( _blockSize ) );
-        else 
+        } else {
             _sparseBlockChecksum = null;
+        }
     }
 
     @Override
@@ -1506,22 +1507,18 @@ public final class Sender implements RsyncTask, MessageHandler
         while (view.windowLength() > 0) {
             int wlen = view.windowLength();
 
-            boolean checkBlockContentSparse;
-            if ( _isSparse && wlen == _blockSize ) {
-                checkBlockContentSparse = checksum.chunkAndZeroCheck( view.windowBuffer(), _sparseBlockChecksum );
-            } else {
-                checkBlockContentSparse = true; // non block size chunks cannot be matched by digest. need to check byte content
-                checksum.chunk( view.windowBuffer() );
-            }
-            
-            if ( _isSparse && checkBlockContentSparse && isBlockContentSparse( view.windowBuffer() ) ) {
+            if ( _isSparse && isBlockContentSparse( view.windowBuffer() ) ) {
                 sendSparseBlock( wlen );
                 _stats._totalMatchedSize += wlen;
             } else {
                 sendDataFrom( view.windowBuffer() );
                 _stats._totalLiteralSize += wlen;
             }
+            
             bytesSent += wlen;
+
+            checksum.chunk( view.windowBuffer() );
+            
             view.slide( wlen );
         }
         _duplexChannel.putInt(0);

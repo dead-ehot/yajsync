@@ -792,6 +792,9 @@ public final class RsyncClient
             }
             sb.append("s");
             sb.append("f");
+            if (_isSparse) {
+                sb.append("S");
+            }
             serverArgs.add(sb.toString());
 
             if (_isDelete && mode == Mode.REMOTE_SEND) {
@@ -799,9 +802,6 @@ public final class RsyncClient
             }
             if (_isNumericIds) {
                 serverArgs.add("--numeric-ids");
-            }
-            if (_isSparse) {
-                serverArgs.add("--sparse");
             }
             if (_isDelete &&
                 _fileSelectionOrNull == FileSelection.TRANSFER_DIRS)

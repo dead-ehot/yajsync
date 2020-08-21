@@ -80,13 +80,6 @@ public class MD5Digest implements ChecksumDigest
     }
     
     @Override
-    public boolean chunkAndZeroCheck( ByteBuffer buf, ByteBuffer zeroBlockDigest )
-    {
-        // one, using MD5 for hash dont care about speed; so returning true here, so caller checks for buf content
-        return true;
-    }
-
-    @Override
     public void chunk( ByteBuffer buf )
     {
         assert seed == 0;
