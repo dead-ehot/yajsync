@@ -28,7 +28,7 @@
                 <configuration>
 
                     <descriptors>
-                        <descriptor>yajsync-app/src/assembly/assembly.xml</descriptor>
+                        <descriptor>../yajsync-app/src/assembly/assembly.xml</descriptor>
                     </descriptors>
 
                     <archive>
