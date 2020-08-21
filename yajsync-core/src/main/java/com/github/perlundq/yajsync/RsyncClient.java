@@ -782,6 +782,9 @@ public final class RsyncClient
             if (_isIgnoreTimes) {
                 sb.append("I");
             }
+            if (_isSparse) {
+                sb.append("S");
+            }
             if (fileSelection == FileSelection.RECURSE) {
                 sb.append("r");
             }
@@ -792,9 +795,6 @@ public final class RsyncClient
             }
             sb.append("s");
             sb.append("f");
-            if (_isSparse) {
-                sb.append("S");
-            }
             serverArgs.add(sb.toString());
 
             if (_isDelete && mode == Mode.REMOTE_SEND) {
