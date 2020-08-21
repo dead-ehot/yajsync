@@ -307,8 +307,6 @@ public final class Sender implements RsyncTask, MessageHandler
     private int _curSegmentIndex;
     private int _ioError;
     
-    private final ByteBuffer _sparseBlockChecksum;
-
     private Sender(Builder builder)
     {
         _duplexChannel = new AutoFlushableRsyncDuplexChannel(
@@ -342,11 +340,6 @@ public final class Sender implements RsyncTask, MessageHandler
         _defaultDirectoryPermissions = builder._defaultDirectoryPermissions;
         _blockSize = builder._blockSize;
         
-        if ( _isSparse ) {
-            _sparseBlockChecksum = _checksumHash.instance( 0 ).digest( ByteBuffer.allocate( _blockSize ) );
-        } else {
-            _sparseBlockChecksum = null;
-        }
     }
 
     @Override
