@@ -2044,6 +2044,8 @@ public class Receiver implements RsyncTask, MessageHandler
                     buffer.rewind();
                     writer.release( buffer );
                     sizeMatch += sparselen;
+                    _stats._totalMatchedSize += sparselen;
+                    _statsListener.refresh( _stats );
                     continue;
                 }
                 // blockIndex >= 0 && blockIndex <= Integer.MAX_VALUE
@@ -2072,7 +2074,10 @@ public class Receiver implements RsyncTask, MessageHandler
                     continue;
                 }
 
-                sizeMatch += blockSize(blockIndex, checksumHeader);
+                int matchedBytes = blockSize(blockIndex, checksumHeader);
+                sizeMatch += matchedBytes;
+                _stats._totalMatchedSize += matchedBytes;
+                _statsListener.refresh( _stats );
 
                 if (isDeferrable) {
                     if (blockIndex == expectedIndex) {
@@ -2110,6 +2115,8 @@ public class Receiver implements RsyncTask, MessageHandler
                 int length = token;
                 sizeLiteral += length;
                 copyFromPeerAndUpdateDigest(writer, length, checksum);
+                _stats._totalLiteralSize += length;
+                _statsListener.refresh( _stats );
             }
         }
 
@@ -2148,9 +2155,6 @@ public class Receiver implements RsyncTask, MessageHandler
                                     100 * sizeMatch /
                                           (float) (sizeMatch + sizeLiteral)));
         }
-        _stats._totalLiteralSize += sizeLiteral;
-        _stats._totalMatchedSize += sizeMatch;
-        _statsListener.refresh( _stats );
         return isDeferrable;
     }
     
