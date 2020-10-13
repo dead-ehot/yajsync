@@ -796,6 +796,7 @@ public final class Sender implements RsyncTask, MessageHandler
                         }
                         numFilesInTransit--;
                     }
+                    sendIndexAndIflags( index, iFlags );
                 } else if (phase == TransferPhase.TRANSFER) {
                     LocatableFileInfo fileInfo = null;
                     if (segment != null) {

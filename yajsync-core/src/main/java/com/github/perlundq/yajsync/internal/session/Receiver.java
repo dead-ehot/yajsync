@@ -1003,22 +1003,33 @@ public class Receiver implements RsyncTask, MessageHandler
                     _log.fine(String.format("Received flags %s for index %d",Item.toString(iFlags), index));
                 }
 
-                segment = Util.defaultIfNull(segment, _fileList.firstSegment());
-                LocatableFileInfo fileInfo = (LocatableFileInfo) segment.getFileWithIndexOrNull(index);
-                if (fileInfo == null) {
-                    if (_fileSelection != FileSelection.RECURSE) {
-                        throw new RsyncProtocolException(String.format(
-                            "Received invalid file index %d from peer",
-                            index));
-                    }
-                    segment = _fileList.getSegmentWith(index);
-                    if (segment == null) {
-                        throw new RsyncProtocolException(String.format(
-                            "Received invalid file %d from peer",
-                            index));
-                    }
+                LocatableFileInfo fileInfo = null;
+                if ( !_fileList.isEmpty() ) {
+                    segment = Util.defaultIfNull(segment, _fileList.firstSegment());
                     fileInfo = (LocatableFileInfo) segment.getFileWithIndexOrNull(index);
-                    assert fileInfo != null;
+                    if (fileInfo == null) {
+                        if (_fileSelection == FileSelection.RECURSE) {
+                            segment = _fileList.getSegmentWith(index);
+                            if ( segment != null ) {
+                                fileInfo = (LocatableFileInfo) segment.getFileWithIndexOrNull( index );
+                            }
+                        }
+                    }
+                }
+                
+                if ( fileInfo == null ) {
+                    if ( ( iFlags & Item.TRANSFER ) == 0 ) {
+                        // Sender sends acks for already finished files by Receiver.
+                        // for hardlinks, receiver has them non finished in some segment
+                        // if it is not foun there - we can safely ignore this index 
+                        if (_log.isLoggable(Level.FINE)) {
+                            _log.fine( String.format( "index %d is not a transfer nor hardlink", index ) );
+                        }
+                        continue;
+                    }
+
+                    throw new RsyncProtocolException( String.format( "Received invalid file %d from peer", index ) );
+                    
                 }
 
                 if ((iFlags & Item.TRANSFER) == 0) {
