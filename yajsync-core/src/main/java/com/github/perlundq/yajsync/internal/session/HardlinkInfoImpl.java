@@ -9,6 +9,7 @@ import java.nio.ByteBuffer;
 
 import com.github.perlundq.yajsync.attr.HardlinkInfo;
 import com.github.perlundq.yajsync.attr.RsyncFileAttributes;
+import com.github.perlundq.yajsync.internal.text.Text;
 
 /**
  * @author Oleg Anastasyev<oa@odnoklassniki.ru>
@@ -74,5 +75,10 @@ class HardlinkInfoImpl extends FileInfoImpl implements HardlinkInfo
         assert path != null;
         _targetPathName = path;
     }
-    
+
+    @Override
+    public String toString()
+    {
+        return super.toString()+", linkedIdx="+_linked_idx+", inode="+attrs().inode();
+    }
 }

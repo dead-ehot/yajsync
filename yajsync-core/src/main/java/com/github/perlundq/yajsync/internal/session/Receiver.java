@@ -999,6 +999,10 @@ public class Receiver implements RsyncTask, MessageHandler
                             Integer.toBinaryString(iFlags)));
                 }
 
+                if (_log.isLoggable(Level.FINE)) {
+                    _log.fine(String.format("Received flags %s for index %d",Item.toString(iFlags), index));
+                }
+
                 segment = Util.defaultIfNull(segment, _fileList.firstSegment());
                 LocatableFileInfo fileInfo = (LocatableFileInfo) segment.getFileWithIndexOrNull(index);
                 if (fileInfo == null) {
@@ -1457,8 +1461,8 @@ public class Receiver implements RsyncTask, MessageHandler
         FileInfoStub stub = new FileInfoStub();
         stub._flags = flags;
         ByteBuffer pathNameBytes = receivePathNameBytes(flags);
-        if ( (flags & TransmitFlags.HLINKED) !=0 && (flags & TransmitFlags.HLINK_FIRST) == 0  ) {
-            stub._firstHlinkIdx = receiveAndDecodeInt();
+        if ( (flags & TransmitFlags.HLINKED) !=0  ) {
+            stub._firstHlinkIdx = (flags & TransmitFlags.HLINK_FIRST) == 0 ? receiveAndDecodeInt() : -1;
         }
         RsyncFileAttributes attrs = receiveRsyncFileAttributes(flags);
         String pathNameOrNull = decodePathName(pathNameBytes);
@@ -1605,7 +1609,7 @@ public class Receiver implements RsyncTask, MessageHandler
                 break;
             }
             if (_log.isLoggable(Level.FINER)) {
-                _log.finer("got flags " + Integer.toBinaryString(flags));
+                _log.finer( "got flags " + TransmitFlags.toString( flags ) );
             }
             FileInfoStub stub = receiveFileInfoStub(flags);
             stubs.add(stub);
@@ -1637,7 +1641,7 @@ public class Receiver implements RsyncTask, MessageHandler
                 break;
             }
             if (_log.isLoggable(Level.FINER)) {
-                _log.finer("got flags " + Integer.toBinaryString(flags));
+                _log.finer( "got flags " + TransmitFlags.toString( flags ) );
             }
             FileInfo fileInfo = receiveFileInfo(flags, builder);
             builder.add(fileInfo);

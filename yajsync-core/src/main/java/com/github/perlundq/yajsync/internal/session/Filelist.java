@@ -164,7 +164,7 @@ public class Filelist
                             long inode = hlink.attrs().inode();
                             if ( inode > 0 ) {
                                 Integer firstIdx = _hlinkInodes.putIfAbsent( inode, index );
-                                if ( firstIdx != null ) {
+                                if ( firstIdx != null && firstIdx != index) {
                                     hlink.setLinkedIndex( firstIdx );
                                     hlink.setAbbrev( firstIdx > _dirIndex );
                                     hlink.setTargetPathName( _hlinkPaths.get( firstIdx ) );
