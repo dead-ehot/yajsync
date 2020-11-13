@@ -23,8 +23,8 @@ import com.github.perlundq.yajsync.internal.util.Environment;
 
 public final class User
 {
-    public static final int ID_MAX = 65535;
-    private static final int ID_NOBODY = ID_MAX - 1;
+    public static final int ID_MAX = Integer.MAX_VALUE;
+    private static final int ID_NOBODY = 65534;
     private static final int MAX_NAME_LENGTH = 255;
 
     public static final User ROOT = new User("root", 0);
