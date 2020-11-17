@@ -42,6 +42,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -52,7 +53,6 @@ import com.github.perlundq.yajsync.FileSelection;
 import com.github.perlundq.yajsync.RsyncException;
 import com.github.perlundq.yajsync.RsyncProtocolException;
 import com.github.perlundq.yajsync.attr.FileInfo;
-import com.github.perlundq.yajsync.attr.HardlinkInfo;
 import com.github.perlundq.yajsync.attr.LocatableDeviceInfo;
 import com.github.perlundq.yajsync.attr.LocatableFileInfo;
 import com.github.perlundq.yajsync.attr.LocatableHardlinkInfo;
@@ -236,7 +236,7 @@ public class Generator implements RsyncTask
     private final FileSelection _fileSelection;
     private final LinkedBlockingQueue<Job> _jobs = new LinkedBlockingQueue<>();
     private final BlockingQueue<Pair<Boolean, FileInfo>> _listing =
-            new LinkedBlockingQueue<>();
+            new ArrayBlockingQueue<>(10000);
     private final List<Filelist.Segment> _generated = new LinkedList<>();
     private final RsyncOutChannel _out;
     private final SimpleDateFormat _dateFormat = new SimpleDateFormat();
@@ -433,7 +433,7 @@ public class Generator implements RsyncTask
             throw new InterruptedException();
         } finally {
             Pair<Boolean, FileInfo> poisonPill = new Pair<>(false, null);
-            _listing.add(poisonPill);
+            _listing.put(poisonPill);
         }
     }
 
@@ -560,7 +560,14 @@ public class Generator implements RsyncTask
                 } else {
                     c = toListing(segment);
                 }
-                _listing.addAll(toListingPair(c));
+                for (Pair<Boolean, FileInfo> p : toListingPair(c)) {
+                    try {
+                        _listing.put(p);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        throw new IllegalStateException(e);
+                    }
+                }
                 segment.removeAll();
                 Filelist.Segment deleted = _fileList.deleteFirstSegment();
                 if (deleted != segment) {
