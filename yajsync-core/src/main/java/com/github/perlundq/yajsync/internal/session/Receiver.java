@@ -1243,10 +1243,7 @@ public class Receiver implements RsyncTask, MessageHandler
             _log.fine("received peer checksum " + checksumHeader);
         }
 
-        try (AutoDeletable tempFile = new AutoDeletable(
-                Files.createTempFile(fileInfo.path().getParent(),
-                                     null, null)))
-        {
+        try ( AutoDeletable tempFile = new AutoDeletable( Files.createTempFile( _targetPath, null, null ) ) )        {
             if (_log.isLoggable(Level.FINE)) {
                 _log.fine("created tempfile " + tempFile);
             }
